@@ -1,0 +1,173 @@
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var requestHelper = __webpack_require__(1)
+var currentSelectedCountry = undefined
+
+var init = function () {
+  makeRequest()
+  renderBucketList()
+
+  var submit = document.querySelector('button')
+  submit.addEventListener('click', addCountryToBucketList)
+}
+
+var makeRequest = function () {
+  var url = 'https://restcountries.eu/rest/v2/all'
+  var xhr = new XMLHttpRequest()
+  xhr.open('GET', url)
+  xhr.addEventListener('load', function () {
+    var countries = JSON.parse(this.responseText)
+    addCountriesToList(countries)
+    // console.log(countries);
+  })
+  xhr.send()
+}
+
+var addCountriesToList = function (countries) {
+  var dropdown = document.querySelector('#select')
+  countries.forEach(function(country, index) {
+    var option = document.createElement("option")
+    option.innerText = country.name
+    option.value = index
+    select.appendChild(option)
+  })
+  select.addEventListener('change', function () {
+  currentSelectedCountry = countries[this.value]
+
+  })
+}
+
+var addCountryToBucketList = function () {
+  console.log(currentSelectedCountry)
+  var url = "http://localhost:3000/api/bucketlist"
+  var countryToSave = {
+    name: currentSelectedCountry.name
+  }
+  requestHelper.postRequest(url, function (result) {
+    renderBucketList()
+  }, countryToSave
+)}
+
+var renderBucketList = function () {
+  var ul = document.querySelector('ul')
+  ul.innerHTML = " "
+  requestHelper.getRequest('http://localhost:3000/api/bucketlist', function (countries) {
+    console.log(countries)
+    countries.forEach(function (country){
+      var li = document.createElement('li')
+      li.innerText = country.name
+      ul.appendChild(li)
+    })
+  })
+}
+
+
+
+
+window.addEventListener('load', init)
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+var requestHelper = {
+  getRequest: function (url, callback) {
+    var xhr = new XMLHttpRequest()
+    xhr.open('GET', url)
+
+    xhr.addEventListener('load', function () {
+      var jsonString = xhr.responseText
+      var data = JSON.parse(jsonString)
+      callback(data)
+    })
+    xhr.send()
+  },
+  postRequest: function (url, callback, payload) {
+    var xhr = new XMLHttpRequest()
+    xhr.open('POST', url)
+
+    xhr.addEventListener('load', function () {
+      var jsonString = xhr.responseText
+      var data = JSON.parse(jsonString)
+      callback(data)
+    })
+    xhr.setRequestHeader('Content-Type', 'application/json')
+    var jsonString = JSON.stringify(payload)
+    xhr.send(jsonString)
+  }
+}
+
+module.exports = requestHelper
+
+
+/***/ })
+/******/ ]);
+//# sourceMappingURL=bundle.js.map
